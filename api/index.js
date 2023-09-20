@@ -5,13 +5,14 @@ const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 const app = express();
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const salt = bcrypt.genSaltSync(10);
 const saltJSON = 'asdl;kfjsdf';
 
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));    // need to include credentials bypass -> check LoginPage login()
 app.use(express.json());
-
+ap.use(cookieParser());
 
 mongoose.connect('mongodb+srv://shafinnahian:kJLGNSh0Bk6D1WOm@cluster0.gw3qxyb.mongodb.net/?retryWrites=true&w=majority');
 
@@ -44,6 +45,14 @@ app.post('/login', async (req, res) => {
         // not logged in
         res.status(400).json('wrong credentials')
     }
+});
+
+app.get('/profile', (req, res) => {
+    const {token} = req.cookies;
+    jwt.verify(token, saltJSON, {}, (err, info) => {
+        if (err) throw err;
+        res.json(info);
+    });
 });
 
 app.listen(4000);

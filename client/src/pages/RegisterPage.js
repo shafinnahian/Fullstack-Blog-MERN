@@ -9,11 +9,17 @@ export default function RegisterPage(){
 
     async function register(ev){    //https://chat.openai.com/share/5faa0115-07f7-46f1-8cc3-56e71ec279e0
         ev.preventDefault();
-        await fetch('http://localhost:4000/register',{
+        const response = await fetch('http://localhost:4000/register',{
             method: 'POST',
             body: JSON.stringify({username, password}),
             headers: {'Content-Type': 'application/json'},
         })
+
+        if (response.status === 200){
+            alert('Registration successful!');
+        } else {
+            alert('Registration failed. Username must be unique.')
+        }
     }
 
     return(

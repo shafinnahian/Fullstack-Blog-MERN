@@ -4,13 +4,15 @@ const { default: mongoose } = require('mongoose');
 const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 const app = express();
+const jwt = require('jsonwebtoken');
 
-app.use(cors());
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(express.json());    //https://chat.openai.com/share/c30c3176-1090-4b60-9e73-2c6ea50d2ec4
 
 mongoose.connect('mongodb+srv://shafinnahian:tqwgPlPnpUE0G2Eu@cluster0.a5ymt04.mongodb.net/?retryWrites=true&w=majority');
 
 const salt = bcrypt.genSaltSync(10);
+const tokenSalt = 'asdfdsfghfghjrty';
 
 app.post('/register', async (req, res) => {   // {post: to send information with a post request}
     const {username, password} = req.body;
@@ -35,6 +37,12 @@ app.post('/login', async (req, res) => {
                                                                     //(userDoc.password is from registration)
     if (passOk){
         // logged in
+        jwt.sign({username, id:userDoc._id}, tokenSalt, {}, (err, token) => {
+            if (err) {
+                console.error(err); // Log JWT signing error
+                res.status(500).json('Internal Server Error');
+            } else res.cookie('token', token).json('ok');
+        });
     } else {
         res.status(400).json('Wrong credentials');
     }

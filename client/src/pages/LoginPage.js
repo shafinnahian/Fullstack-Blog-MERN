@@ -13,6 +13,7 @@ export default function LoginPage(){
             method: 'POST',
             body: JSON.stringify({username, password}),
             headers: {'COntent-Type':'application/json'},
+            credentials: 'include', // saves cookie in the local browser
         })
     }
     return (

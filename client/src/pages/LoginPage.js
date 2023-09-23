@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Navigate } from "react-router-dom";
 
 export default function LoginPage(){
     const [username, setUsername] = useState('');
@@ -6,15 +7,24 @@ export default function LoginPage(){
     //  The useState hook in React is used to add state to functional components. 
     //  When you call useState with an initial value, such as useState(''), it returns an array with two elements:
     //  The current state value & a function to update that state value.
-
+    const [redirect, setRedirect] = useState(false);    // when true, renders homepage
     async function login(ev){
         ev.preventDefault();
-        await fetch('http://localhost:4000/login', {
+        const response = await fetch('http://localhost:4000/login', {
             method: 'POST',
             body: JSON.stringify({username, password}),
             headers: {'COntent-Type':'application/json'},
             credentials: 'include', // saves cookie in the local browser
-        })
+        });
+        if (response.ok){
+            setRedirect(true);
+        } else {
+            alert('wrong credentials');
+        }
+    }
+
+    if (redirect){
+        return <Navigate to={'/'} />    // if redirect == true, we are logged in -> render homepage.
     }
     return (
         <form className="login" onSubmit={login}>

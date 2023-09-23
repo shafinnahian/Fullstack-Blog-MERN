@@ -5,9 +5,11 @@ const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 const app = express();
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(express.json());    //https://chat.openai.com/share/c30c3176-1090-4b60-9e73-2c6ea50d2ec4
+app.use(cookieParser());
 
 mongoose.connect('mongodb+srv://shafinnahian:tqwgPlPnpUE0G2Eu@cluster0.a5ymt04.mongodb.net/?retryWrites=true&w=majority');
 
@@ -46,6 +48,14 @@ app.post('/login', async (req, res) => {
     } else {
         res.status(400).json('Wrong credentials');
     }
+})
+
+app.get('/profile', (req, res) => {
+    const {token} = req.cookies;
+    jwt.verify(token, tokenSalt, {}, (err, info) => {
+        if (err) throw err;
+        res.json(info);
+    });
 })
 
 app.listen(4000);

@@ -43,7 +43,10 @@ app.post('/login', async (req, res) => {
             if (err) {
                 console.error(err); // Log JWT signing error
                 res.status(500).json('Internal Server Error');
-            } else res.cookie('token', token).json('ok');
+            } else res.cookie('token', token).json({
+                id: userDoc._id,
+                username,
+            });
         });
     } else {
         res.status(400).json('Wrong credentials');
@@ -56,6 +59,10 @@ app.get('/profile', (req, res) => {
         if (err) throw err;
         res.json(info);
     });
+})
+
+app.post('/logout', (req, res) => {
+    res.cookie('token','').json('ok');  // assigning cookie 'token' to an empty strings - clearing cookie
 })
 
 app.listen(4000);

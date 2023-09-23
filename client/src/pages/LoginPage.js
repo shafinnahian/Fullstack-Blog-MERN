@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { Navigate } from "react-router-dom";
+import { UserContext } from "../UserContext";
 
 export default function LoginPage(){
     const [username, setUsername] = useState('');
@@ -8,6 +9,7 @@ export default function LoginPage(){
     //  When you call useState with an initial value, such as useState(''), it returns an array with two elements:
     //  The current state value & a function to update that state value.
     const [redirect, setRedirect] = useState(false);    // when true, renders homepage
+    const {setUserInfo} = useContext(UserContext);
     async function login(ev){
         ev.preventDefault();
         const response = await fetch('http://localhost:4000/login', {
@@ -17,7 +19,10 @@ export default function LoginPage(){
             credentials: 'include', // saves cookie in the local browser
         });
         if (response.ok){
-            setRedirect(true);
+            response.json().then(userInfo => {
+                setUserInfo(userInfo);
+                setRedirect(true);
+            })
         } else {
             alert('wrong credentials');
         }

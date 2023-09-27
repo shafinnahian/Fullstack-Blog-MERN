@@ -14,6 +14,7 @@ const fs = require('fs'); // from filesystem to rename
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(express.json());    //https://chat.openai.com/share/c30c3176-1090-4b60-9e73-2c6ea50d2ec4
 app.use(cookieParser());
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 mongoose.connect('mongodb+srv://shafinnahian:tqwgPlPnpUE0G2Eu@cluster0.a5ymt04.mongodb.net/?retryWrites=true&w=majority');
 
@@ -76,16 +77,30 @@ app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
     const newPath = path+'.'+extension;
     fs.renameSync(path, newPath);    // to rename and put the proper format e.g image -> image.webp
     
-    const {title, summary, content} = req.body;
-    const postDoc = await Post.create({
-        title,
-        summary,
-        content,
-        cover: newPath,
+    const {token} = req.cookies;
+    jwt.verify(token, tokenSalt, {}, async (err, info) => {
+        if (err) throw err;
+        const {title, summary, content} = req.body;
+        const postDoc = await Post.create({
+            title,
+            summary,
+            content,
+            cover: newPath,
+            author: info.id,
+        });
+        res.json(postDoc)
+        // res.json(info);
     });
+
     
-    res.json(postDoc)
 }); //https://www.npmjs.com/package/multer (why uploadMiddleware.single('file')? )
+
+app.get('/post', async (req, res) => {
+    res.json(await Post.find()
+                        .populate('author', ['username'])
+                        .sort({createdAt: -1})
+                        );
+})
 
 app.listen(4000);
 //tqwgPlPnpUE0G2Eu

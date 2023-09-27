@@ -2,12 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const { default: mongoose } = require('mongoose');
 const User = require('./models/User');
+const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
 const app = express();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const uploadMiddleware = multer({ dest: 'uploads/' })
+const fs = require('fs'); // from filesystem to rename
 
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(express.json());    //https://chat.openai.com/share/c30c3176-1090-4b60-9e73-2c6ea50d2ec4
@@ -67,8 +69,22 @@ app.post('/logout', (req, res) => {
     res.cookie('token','').json('ok');  // assigning cookie 'token' to an empty strings - clearing cookie
 });
 
-app.post('/post', uploadMiddleware.single('file'), (req, res) => {
-    res.json({files: req.file})
+app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
+    const {originalname, path} = req.file;
+    const parts = originalname.split('.');
+    const extension = parts[parts.length - 1];  // taking the image format e.g. webp, png
+    const newPath = path+'.'+extension;
+    fs.renameSync(path, newPath);    // to rename and put the proper format e.g image -> image.webp
+    
+    const {title, summary, content} = req.body;
+    const postDoc = await Post.create({
+        title,
+        summary,
+        content,
+        cover: newPath,
+    });
+    
+    res.json(postDoc)
 }); //https://www.npmjs.com/package/multer (why uploadMiddleware.single('file')? )
 
 app.listen(4000);

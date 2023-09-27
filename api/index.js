@@ -6,6 +6,8 @@ const bcrypt = require('bcryptjs');
 const app = express();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
+const uploadMiddleware = multer({ dest: 'uploads/' })
 
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(express.json());    //https://chat.openai.com/share/c30c3176-1090-4b60-9e73-2c6ea50d2ec4
@@ -63,7 +65,11 @@ app.get('/profile', (req, res) => {
 
 app.post('/logout', (req, res) => {
     res.cookie('token','').json('ok');  // assigning cookie 'token' to an empty strings - clearing cookie
-})
+});
+
+app.post('/post', uploadMiddleware.single('file'), (req, res) => {
+    res.json({files: req.file})
+}); //https://www.npmjs.com/package/multer (why uploadMiddleware.single('file')? )
 
 app.listen(4000);
 //tqwgPlPnpUE0G2Eu

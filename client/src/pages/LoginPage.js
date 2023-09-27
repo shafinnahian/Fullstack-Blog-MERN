@@ -21,7 +21,7 @@ export default function LoginPage(){
         if (response.ok){
             response.json().then(userInfo => {
                 setUserInfo(userInfo);
-                setRedirect(true);
+                setRedirect(true);  // renders the header to logged in 
             })
         } else {
             alert('wrong credentials');
